@@ -25,7 +25,7 @@ def main() -> None:
 
     game.sim_game()
 
-    display_score_graph(game)
+    # display_score_graph(game)
 
 
 if __name__ == '__main__':
