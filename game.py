@@ -1,29 +1,16 @@
 import random
 
 from player import Player
+from config import *
 
 
 class Game:
-    def __init__(self, team1: list[Player], team2: list[Player],
-                 regulation_periods: int=4, regulation_period_length: int= 12 * 60,
-                 overtime_length: int = 5 * 60,
-                 shot_clock_length: int=24,
-                 players_on_court: int= 3):
-        if regulation_periods < 1: raise ValueError("Periods must be >= 1")
-        if regulation_period_length < 1: raise ValueError("Period length must be >= 1")
-        if shot_clock_length < 1: raise ValueError("Shot clock must be >= 1")
-        if shot_clock_length > regulation_period_length: raise ValueError("Shot clock must be <= period seconds")
-        if len(team1) != players_on_court: raise ValueError("Team 1 length is wrong")
-        if len(team2) != players_on_court: raise ValueError("Team 2 length is wrong")
+    def __init__(self, team1: list[Player], team2: list[Player]):
+        if len(team1) != PLAYERS_ON_COURT: raise ValueError("Team 1 length is wrong")
+        if len(team2) != PLAYERS_ON_COURT: raise ValueError("Team 2 length is wrong")
 
         self.team1 = team1
         self.team2 = team2
-        self.regulation_periods = regulation_periods
-        self.regulation_period_length = regulation_period_length
-
-        self.overtime_length = overtime_length
-
-        self.shot_clock_length = shot_clock_length
 
         self.team1_score: int = 0
         self.team2_score: int = 0
@@ -42,10 +29,10 @@ class Game:
     def sim_game(self) -> None:
         print(self.team1, self.team2)
 
-        for period in range(self.regulation_periods):
+        for period in range(REGULATION_PERIODS):
             print(f"Q{period + 1}")
 
-            self.sim_period(self.regulation_period_length)
+            self.sim_period(REGULATION_PERIOD_LENGTH)
 
         overtimes: int = 0
 
@@ -53,7 +40,7 @@ class Game:
             print(f"{overtimes + 1 if overtimes > 0 else ""}OT")
             overtimes += 1
 
-            self.sim_period(self.overtime_length)
+            self.sim_period(OVERTIME_PERIOD_LENGTH)
 
         self.handle_winner()
 
@@ -72,8 +59,8 @@ class Game:
             self.score_history.append((self.game_seconds_played, self.team1_score, self.team2_score))
 
     def sim_possession(self, period_time: int) -> int:
-        if period_time > self.shot_clock_length:
-            time_elapsed = random.randrange(1, self.shot_clock_length)
+        if period_time > SHOT_CLOCK_LENGTH:
+            time_elapsed = random.randrange(1, SHOT_CLOCK_LENGTH)
         else:
             time_elapsed = period_time
         period_time -= time_elapsed

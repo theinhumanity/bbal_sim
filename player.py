@@ -1,10 +1,11 @@
 import random
+from config import *
 
 
 class Player:
     def __init__(self, name: str):
         self.name = name
-        self.shot_accuracy: float = random.normalvariate(0.5, 0.15)
+        self.shot_accuracy: float = random.normalvariate(SHOOTING_EFFICIENCY_MEAN, SHOOTING_EFFICIENCY_SD)
         self.clamp_shot_accuracy()
 
     def clamp_shot_accuracy(self):
