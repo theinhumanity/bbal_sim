@@ -1,5 +1,6 @@
 import random
 from typing import Tuple
+import matplotlib.pyplot as plt
 
 PLAYERS_ON_COURT: int = 2
 
@@ -43,9 +44,11 @@ class Game:
         self.offense: list[Player] = team1
 
         self.boxscore: dict[Player, int] = {}
-
         for player in self.team1 + self.team2:
             self.boxscore[player] = 0
+
+        # (game_seconds_played, team1_score, team2_score)
+        self.score_history: list[tuple[int, int, int]] = []
 
     def sim_game(self) -> None:
         print(self.team1, self.team2)
@@ -53,20 +56,21 @@ class Game:
         for period in range(self.periods):
             print(f"Q{period + 1}")
 
-            self.sim_period()
+            self.sim_period(period)
 
+        self.handle_winner()
+
+    def handle_winner(self):
         if self.team1_score > self.team2_score:
             print(f"Team 1 {self.team1} won by {self.team1_score - self.team2_score} points!!!")
         elif self.team2_score > self.team1_score:
             print(f"Team 2 {self.team2} won by {self.team2_score - self.team1_score} points!!!)")
         else:
             print("Tie.")
-
         for player in self.team1 + self.team2:
             print(f"{player.name} scored {self.boxscore[player]} points")
 
-
-    def sim_period(self) -> None:
+    def sim_period(self, period: int) -> None:
         period_time: int = self.period_seconds
         while period_time > 0:
             time_elapsed = self.sim_possession(period_time)
@@ -76,6 +80,9 @@ class Game:
 
             print(print_time(period_time))
             print(print_score(self.team1_score, self.team2_score))
+
+            game_seconds_played = period * self.period_seconds + self.period_seconds - period_time
+            self.score_history.append((game_seconds_played, self.team1_score, self.team2_score))
 
     def sim_possession(self, period_time: int) -> int:
         if period_time > self.shot_clock_seconds:
@@ -129,6 +136,18 @@ def main() -> None:
     game: Game = Game(team1, team2)
 
     game.sim_game()
+
+    times = [t for t, _, _ in game.score_history]
+    team1_scores = [s1 for _, s1, _ in game.score_history]
+    team2_scores = [s2 for _, _, s2 in game.score_history]
+
+    plt.plot(times, team1_scores, label="Team 1")
+    plt.plot(times, team2_scores, label="Team 2")
+
+    plt.xlabel("Game time (seconds)")
+    plt.ylabel("Score")
+    plt.legend()
+    plt.show()
 
 
 if __name__ == '__main__':
