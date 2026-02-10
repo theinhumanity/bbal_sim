@@ -3,7 +3,6 @@ import random
 from player import Player
 from config import *
 
-
 class Game:
     def __init__(self, team1: list[Player], team2: list[Player]):
         if len(team1) != PLAYERS_ON_COURT: raise ValueError("Team 1 length is wrong")
@@ -16,6 +15,7 @@ class Game:
         self.team2_score: int = 0
 
         self.offense: list[Player] = team1
+        self.defense: list[Player] = team2
 
         self.boxscore: dict[Player, int] = {}
         for player in self.team1 + self.team2:
@@ -47,35 +47,56 @@ class Game:
     def sim_period(self, period_length: int) -> None:
         period_time: int = period_length
         while period_time > 0:
+            print(print_time(period_time))
+
             time_elapsed = self.sim_possession(period_time)
             period_time -= time_elapsed
 
-            self.offense = self.team2 if self.offense is self.team1 else self.team1
-
-            print(print_time(period_time))
             print(print_score(self.team1_score, self.team2_score))
 
             self.game_seconds_played += time_elapsed
             self.score_history.append((self.game_seconds_played, self.team1_score, self.team2_score))
 
     def sim_possession(self, period_time: int) -> int:
-        if period_time > SHOT_CLOCK_LENGTH:
-            time_elapsed = random.randrange(1, SHOT_CLOCK_LENGTH)
-        else:
-            time_elapsed = period_time
-        period_time -= time_elapsed
-        if self.offense is self.team1:
-            player, points = shot_attempt(self.team1)
-            self.team1_score += points
-        else:
-            player, points = shot_attempt(self.team2)
-            self.team2_score += points
+        possession_over: bool = False
+        time_elapsed: int = 0
 
-        print(print_shot_attempts(player, points))
+        while not possession_over or period_time == 0:
+            if period_time - time_elapsed > SHOT_CLOCK_LENGTH:
+                time_elapsed += random.randrange(1, SHOT_CLOCK_LENGTH)
+            else:
+                time_elapsed = period_time
 
-        self.boxscore[player] += points
+            if self.offense is self.team1:
+                player, points = shot_attempt(self.team1)
+                self.team1_score += points
+            else:
+                player, points = shot_attempt(self.team2)
+                self.team2_score += points
+
+            print(print_shot_attempts(player, points))
+
+            if points > 0: # Scored, possession over
+                possession_over = True
+                self.switch_possession()
+            else:
+                rebounder: Player = rebound(self.offense, self.defense)
+                print(rebounder)
+
+                if rebounder in self.offense: # Offensive rebound, possession continues
+                    continue
+                elif rebounder in self.defense: # Defensive rebound, possession over
+                    possession_over = True
+                    self.switch_possession()
+
+
+            self.boxscore[player] += points
 
         return time_elapsed
+
+    def switch_possession(self):
+        self.offense = self.team2 if self.offense is self.team1 else self.team1
+        self.defense = self.team2 if self.defense is self.team1 else self.team1
 
     def handle_winner(self):
         if self.team1_score > self.team2_score:
@@ -86,6 +107,19 @@ class Game:
             print("Tie.")
         for player in self.team1 + self.team2:
             print(f"{player.name} scored {self.boxscore[player]} points")
+
+def rebound(offense: list[Player], defense: list[Player]) -> Player:
+    players: list[Player] = (
+        offense + defense
+    )
+
+    weights: list[float] = (
+        [p.rebounding * OFFENSIVE_REBOUNDING_FACTOR for p in offense] +
+        [p.rebounding * DEFENSIVE_REBOUNDING_FACTOR for p in defense]
+    )
+
+    return random.choices(players, weights=weights, k=1)[0]
+
 
 
 def shot_attempt(team: list[Player]) -> tuple[Player, int]:
@@ -112,6 +146,8 @@ def print_score(team1_score, team2_score) -> str:
 
 
 def print_shot_attempts(player, points) -> str:
+    color = "\033[92m"
+
     if points > 0:
         return f"{player.name} scored {points} points!"
     else:

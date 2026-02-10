@@ -1,4 +1,4 @@
-# Game constants
+# Game time constants
 PLAYERS_ON_COURT: int = 3
 REGULATION_PERIODS: int = 4
 REGULATION_PERIOD_LENGTH: int = 12 * 60
@@ -12,9 +12,20 @@ if SHOT_CLOCK_LENGTH < 1: raise ValueError("Shot clock must be >= 1")
 if SHOT_CLOCK_LENGTH > REGULATION_PERIOD_LENGTH: raise ValueError("Shot clock must be <= period seconds")
 if SHOT_CLOCK_LENGTH > OVERTIME_PERIOD_LENGTH: raise ValueError("Shot clock must be <= overtime seconds")
 
+# Game simulation constants
+OFFENSIVE_REBOUNDING_FACTOR = 0.3 # 0 = no offensive rebounds, 1 = only offensive rebounds
+DEFENSIVE_REBOUNDING_FACTOR = 1 - OFFENSIVE_REBOUNDING_FACTOR
+
+if OFFENSIVE_REBOUNDING_FACTOR > 1: raise ValueError("Offensive rebounding factor must be <= 1")
+if OFFENSIVE_REBOUNDING_FACTOR < 0: raise ValueError("Offensive rebounding factor must be >= 0")
+
 # Player constants
 SHOOTING_EFFICIENCY_MEAN: float = 0.5
 SHOOTING_EFFICIENCY_SD: float = 0.15
+REBOUNDING_MEAN: float = 0.5
+REBOUNDING_SD: float = 0.15
 
 if SHOOTING_EFFICIENCY_MEAN > 1: raise ValueError("Mean must be <= 1")
 if SHOOTING_EFFICIENCY_SD < 0: raise ValueError("Mean must be >= 0")
+if REBOUNDING_MEAN > 1: raise ValueError("Mean must be <= 1")
+if REBOUNDING_SD < 0: raise ValueError("Mean must be >= 0")
