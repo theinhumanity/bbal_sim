@@ -18,9 +18,12 @@ class Game:
         self.offense: list[Player] = team1
         self.defense: list[Player] = team2
 
-        self.boxscore: dict[Player, int] = {}
+        self.boxscore: dict[Player, dict[str, int]] = {}
         for player in self.team1 + self.team2:
-            self.boxscore[player] = 0
+            self.boxscore[player] = {
+                'points': 0,
+                'rebounds': 0,
+            }
 
         self.game_seconds_played = 0
 
@@ -83,6 +86,7 @@ class Game:
             else:
                 rebounder: Player = rebound(self.offense, self.defense)
                 print(self.print_rebound(rebounder))
+                self.boxscore[rebounder]['rebounds'] += 1
 
                 if rebounder in self.offense: # Offensive rebound, possession continues
                     continue
@@ -91,7 +95,7 @@ class Game:
                     self.switch_possession()
 
 
-            self.boxscore[player] += points
+            self.boxscore[player]['points'] += points
 
         return time_elapsed
 
@@ -106,8 +110,9 @@ class Game:
             print(f"Team 2 {self.team2} won by {self.team2_score - self.team1_score} points!!!)")
         else:
             print("Tie.")
+
         for player in self.team1 + self.team2:
-            print(f"{player.name} scored {self.boxscore[player]} points")
+            print(f"{player.name} scored {self.boxscore[player]['points']} points and grabbed {self.boxscore[player]['rebounds']} rebounds")
 
 
     def print_rebound(self, rebounder: Player) -> str:
