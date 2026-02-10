@@ -1,4 +1,5 @@
 import random
+from colorama import Fore
 
 from player import Player
 from config import *
@@ -74,14 +75,14 @@ class Game:
                 player, points = shot_attempt(self.team2)
                 self.team2_score += points
 
-            print(print_shot_attempts(player, points))
+            print(self.print_shot_attempt(player, points))
 
             if points > 0: # Scored, possession over
                 possession_over = True
                 self.switch_possession()
             else:
                 rebounder: Player = rebound(self.offense, self.defense)
-                print(rebounder)
+                print(self.print_rebound(rebounder))
 
                 if rebounder in self.offense: # Offensive rebound, possession continues
                     continue
@@ -108,18 +109,33 @@ class Game:
         for player in self.team1 + self.team2:
             print(f"{player.name} scored {self.boxscore[player]} points")
 
-def rebound(offense: list[Player], defense: list[Player]) -> Player:
-    players: list[Player] = (
-        offense + defense
-    )
 
-    weights: list[float] = (
-        [p.rebounding * OFFENSIVE_REBOUNDING_FACTOR for p in offense] +
-        [p.rebounding * DEFENSIVE_REBOUNDING_FACTOR for p in defense]
-    )
+    def print_rebound(self, rebounder: Player) -> str:
+        color = self.get_color(rebounder)
 
-    return random.choices(players, weights=weights, k=1)[0]
+        if rebounder in self.offense:
+            return f"{color}{rebounder.name} grabbed the offensive rebound!{Fore.RESET}"
+        elif rebounder in self.defense:
+            return f"{color}{rebounder.name} secured the defensive rebound.{Fore.RESET}"
+        else:
+            raise ValueError(f"Player not on offense or defense!")
 
+
+    def print_shot_attempt(self, player, points) -> str:
+        color = self.get_color(player)
+
+        if points > 0:
+            return f"{color}{player.name} scored {points} points!{Fore.RESET}"
+        else:
+            return f"{color}{player.name} missed!{Fore.RESET}"
+
+    def get_color(self, player: Player) -> str:
+        if player in self.team1:
+            return Fore.RED
+        elif player in self.team2:
+            return Fore.BLUE
+        else:
+            raise ValueError(f"Player not on team 1 or team 2!")
 
 
 def shot_attempt(team: list[Player]) -> tuple[Player, int]:
@@ -137,18 +153,22 @@ def shot_attempt(team: list[Player]) -> tuple[Player, int]:
     return player, points
 
 
+def rebound(offense: list[Player], defense: list[Player]) -> Player:
+    players: list[Player] = (
+        offense + defense
+    )
+
+    weights: list[float] = (
+        [p.rebounding * OFFENSIVE_REBOUNDING_FACTOR for p in offense] +
+        [p.rebounding * DEFENSIVE_REBOUNDING_FACTOR for p in defense]
+    )
+
+    return random.choices(players, weights=weights, k=1)[0]
+
+
 def print_time(period_time) -> str:
     return f"{period_time // 60 :02}:{period_time % 60 :02}"
 
 
 def print_score(team1_score, team2_score) -> str:
     return f"{team1_score} - {team2_score}"
-
-
-def print_shot_attempts(player, points) -> str:
-    color = "\033[92m"
-
-    if points > 0:
-        return f"{player.name} scored {points} points!"
-    else:
-        return f"{player.name} missed!"
