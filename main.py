@@ -4,7 +4,7 @@ from game import Game
 from player import Player
 
 
-def display_score_graph(game):
+def display_score_graph(game: Game) -> None:
     times = [t for t, _, _ in game.score_history]
     team1_scores = [s1 for _, s1, _ in game.score_history]
     team2_scores = [s2 for _, _, s2 in game.score_history]
@@ -25,7 +25,7 @@ def main() -> None:
 
     game.sim_game()
 
-    # display_score_graph(game)
+    display_score_graph(game)
 
 
 if __name__ == '__main__':

@@ -30,18 +30,22 @@ class Game:
         # (game_seconds_played, team1_score, team2_score)
         self.score_history: list[tuple[int, int, int]] = []
 
+    @staticmethod
+    def log(msg: str) -> None:
+        print(msg)
+
     def sim_game(self) -> None:
         print(self.team1, self.team2)
 
         for period in range(REGULATION_PERIODS):
-            print(f"Q{period + 1}")
+            self.log(f"Q{period + 1}")
 
             self.sim_period(REGULATION_PERIOD_LENGTH)
 
         overtimes: int = 0
 
         while self.team1_score == self.team2_score:
-            print(f"{overtimes + 1 if overtimes > 0 else ""}OT")
+            self.log(f"{overtimes + 1 }OT" if overtimes > 0 else "OT")
             overtimes += 1
 
             self.sim_period(OVERTIME_PERIOD_LENGTH)
@@ -51,12 +55,12 @@ class Game:
     def sim_period(self, period_length: int) -> None:
         period_time: int = period_length
         while period_time > 0:
-            print(print_time(period_time))
+            self.log(print_time(period_time))
 
             time_elapsed = self.sim_possession(period_time)
             period_time -= time_elapsed
 
-            print(print_score(self.team1_score, self.team2_score))
+            self.log(print_score(self.team1_score, self.team2_score))
 
             self.game_seconds_played += time_elapsed
             self.score_history.append((self.game_seconds_played, self.team1_score, self.team2_score))
@@ -65,7 +69,7 @@ class Game:
         possession_over: bool = False
         time_elapsed: int = 0
 
-        while not possession_over or period_time == 0:
+        while not possession_over and period_time > 0:
             if period_time - time_elapsed > SHOT_CLOCK_LENGTH:
                 time_elapsed += random.randrange(1, SHOT_CLOCK_LENGTH)
             else:
@@ -78,14 +82,15 @@ class Game:
                 player, points = shot_attempt(self.team2)
                 self.team2_score += points
 
-            print(self.print_shot_attempt(player, points))
+            self.log(self.print_shot_attempt(player, points))
+            self.boxscore[player]['points'] += points
 
             if points > 0: # Scored, possession over
                 possession_over = True
                 self.switch_possession()
             else:
                 rebounder: Player = rebound(self.offense, self.defense)
-                print(self.print_rebound(rebounder))
+                self.log(self.print_rebound(rebounder))
                 self.boxscore[rebounder]['rebounds'] += 1
 
                 if rebounder in self.offense: # Offensive rebound, possession continues
@@ -93,26 +98,25 @@ class Game:
                 elif rebounder in self.defense: # Defensive rebound, possession over
                     possession_over = True
                     self.switch_possession()
-
-
-            self.boxscore[player]['points'] += points
+                else:
+                    raise ValueError("Rebounder neither of offense or defense!")
 
         return time_elapsed
 
     def switch_possession(self):
-        self.offense = self.team2 if self.offense is self.team1 else self.team1
-        self.defense = self.team2 if self.defense is self.team1 else self.team1
+        self.offense, self.defense = self.defense, self.offense
+
 
     def handle_winner(self):
         if self.team1_score > self.team2_score:
-            print(f"Team 1 {self.team1} won by {self.team1_score - self.team2_score} points!!!")
+            self.log(f"Team 1 {self.team1} won by {self.team1_score - self.team2_score} points!!!")
         elif self.team2_score > self.team1_score:
-            print(f"Team 2 {self.team2} won by {self.team2_score - self.team1_score} points!!!)")
+            self.log(f"Team 2 {self.team2} won by {self.team2_score - self.team1_score} points!!!)")
         else:
-            print("Tie.")
+            self.log("Tie.")
 
         for player in self.team1 + self.team2:
-            print(f"{player.name} scored {self.boxscore[player]['points']} points and grabbed {self.boxscore[player]['rebounds']} rebounds")
+            self.log(f"{player.name} scored {self.boxscore[player]['points']} points and grabbed {self.boxscore[player]['rebounds']} rebounds")
 
 
     def print_rebound(self, rebounder: Player) -> str:
@@ -126,7 +130,7 @@ class Game:
             raise ValueError(f"Player not on offense or defense!")
 
 
-    def print_shot_attempt(self, player, points) -> str:
+    def print_shot_attempt(self, player: Player, points: int) -> str:
         color = self.get_color(player)
 
         if points > 0:
@@ -146,9 +150,9 @@ class Game:
 def shot_attempt(team: list[Player]) -> tuple[Player, int]:
     player: Player = random.choices(
         team,
-        weights=[p.shot_accuracy for p in team],
+        weights=[p.shot_accuracy ** SHOOTING_TENDENCY_FACTOR for p in team],
         k=1
-    )[0]
+    )[0] # Better players shoot more
 
     points: int = 0
 
