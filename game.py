@@ -1,5 +1,4 @@
 import random
-from colorama import Fore
 
 from player import Player
 from config import *
@@ -14,6 +13,8 @@ class Game:
 
         self.team1_score: int = 0
         self.team2_score: int = 0
+
+        self.most_recent_scorer = 0
 
         self.offense: list[Player] = team1
         self.defense: list[Player] = team2
@@ -55,12 +56,12 @@ class Game:
     def sim_period(self, period_length: int) -> None:
         period_time: int = period_length
         while period_time > 0:
-            self.log(print_time(period_time))
+            self.log(self.print_time(period_time))
 
             time_elapsed = self.sim_possession(period_time)
             period_time -= time_elapsed
 
-            self.log(print_score(self.team1_score, self.team2_score))
+            self.log(self.print_score())
 
             self.game_seconds_played += time_elapsed
             self.score_history.append((self.game_seconds_played, self.team1_score, self.team2_score))
@@ -75,11 +76,11 @@ class Game:
             else:
                 time_elapsed = period_time
 
+            player, points = self.shot_attempt()
+
             if self.offense is self.team1:
-                player, points = shot_attempt(self.team1)
                 self.team1_score += points
             else:
-                player, points = shot_attempt(self.team2)
                 self.team2_score += points
 
             self.log(self.print_shot_attempt(player, points))
@@ -87,9 +88,10 @@ class Game:
 
             if points > 0: # Scored, possession over
                 possession_over = True
+                self.most_recent_scorer = 1 if self.offense is self.team1 else 2
                 self.switch_possession()
             else:
-                rebounder: Player = rebound(self.offense, self.defense)
+                rebounder: Player = self.rebound()
                 self.log(self.print_rebound(rebounder))
                 self.boxscore[rebounder]['rebounds'] += 1
 
@@ -97,6 +99,7 @@ class Game:
                     continue
                 elif rebounder in self.defense: # Defensive rebound, possession over
                     possession_over = True
+                    self.most_recent_scorer = 0
                     self.switch_possession()
                 else:
                     raise ValueError("Rebounder neither of offense or defense!")
@@ -123,9 +126,9 @@ class Game:
         color = self.get_color(rebounder)
 
         if rebounder in self.offense:
-            return f"{color}{rebounder.name} grabbed the offensive rebound!{Fore.RESET}"
+            return f"{color}{rebounder.name} grabbed the offensive rebound!{END}"
         elif rebounder in self.defense:
-            return f"{color}{rebounder.name} secured the defensive rebound.{Fore.RESET}"
+            return f"{color}{rebounder.name} secured the defensive rebound.{END}"
         else:
             raise ValueError(f"Player not on offense or defense!")
 
@@ -134,50 +137,53 @@ class Game:
         color = self.get_color(player)
 
         if points > 0:
-            return f"{color}{player.name} scored {points} points!{Fore.RESET}"
+            return f"{color}{player.name} scored {points} points!{END}"
         else:
-            return f"{color}{player.name} missed!{Fore.RESET}"
+            return f"{color}{player.name} missed!{END}"
 
     def get_color(self, player: Player) -> str:
         if player in self.team1:
-            return Fore.RED
+            return RED
         elif player in self.team2:
-            return Fore.BLUE
+            return BLUE
         else:
             raise ValueError(f"Player not on team 1 or team 2!")
 
 
-def shot_attempt(team: list[Player]) -> tuple[Player, int]:
-    player: Player = random.choices(
-        team,
-        weights=[p.shot_accuracy ** SHOOTING_TENDENCY_FACTOR for p in team],
-        k=1
-    )[0] # Better players shoot more
+    def shot_attempt(self) -> tuple[Player, int]:
+        player: Player = random.choices(
+            self.offense,
+            weights=[p.shot_accuracy ** SHOOTING_TENDENCY_FACTOR for p in self.offense],
+            k=1
+        )[0] # Better players shoot more
 
-    points: int = 0
+        points: int = 0
 
-    if random.random() < player.shot_accuracy:
-        points += 2
+        if random.random() < player.shot_accuracy:
+            points += 2
 
-    return player, points
-
-
-def rebound(offense: list[Player], defense: list[Player]) -> Player:
-    players: list[Player] = (
-        offense + defense
-    )
-
-    weights: list[float] = (
-        [p.rebounding * OFFENSIVE_REBOUNDING_FACTOR for p in offense] +
-        [p.rebounding * DEFENSIVE_REBOUNDING_FACTOR for p in defense]
-    )
-
-    return random.choices(players, weights=weights, k=1)[0]
+        return player, points
 
 
-def print_time(period_time) -> str:
-    return f"{period_time // 60 :02}:{period_time % 60 :02}"
+    def print_score(self) -> str:
+        team1_score_string: str = f"{BOLD if self.most_recent_scorer == 1 else ''}{self.team1_score:}{END}"
+        team2_score_string: str = f"{BOLD if self.most_recent_scorer == 2 else ''}{self.team2_score:}{END}"
+        return f"{team1_score_string} - {team2_score_string}"
 
 
-def print_score(team1_score, team2_score) -> str:
-    return f"{team1_score} - {team2_score}"
+    def rebound(self) -> Player:
+        players: list[Player] = (
+            self.offense + self.defense
+        )
+
+        weights: list[float] = (
+            [p.rebounding * OFFENSIVE_REBOUNDING_FACTOR for p in self.offense] +
+            [p.rebounding * DEFENSIVE_REBOUNDING_FACTOR for p in self.defense]
+        )
+
+        return random.choices(players, weights=weights, k=1)[0]
+
+
+    @staticmethod
+    def print_time(period_time) -> str:
+        return f"{period_time // 60 :02}:{period_time % 60 :02}"

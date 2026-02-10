@@ -31,3 +31,9 @@ if SHOOTING_EFFICIENCY_SD < 0: raise ValueError("Mean must be >= 0")
 if REBOUNDING_MEAN > 1: raise ValueError("Mean must be <= 1")
 if REBOUNDING_SD < 0: raise ValueError("Mean must be >= 0")
 if SHOOTING_TENDENCY_FACTOR < 0: raise ValueError("Tendency factor must be >= 0")
+
+# Printing constants
+BLUE = '\033[94m'
+RED = '\033[91m'
+BOLD = '\033[1m'
+END = '\033[0m'
