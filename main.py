@@ -18,8 +18,8 @@ def display_score_graph(game: Game) -> None:
 
 
 def main() -> None:
-    team1: list[Player] = [Player('Kazuki'), Player('Adam'), Player('Rome')]
-    team2: list[Player] = [Player('Mauk'), Player('Jille'), Player('Jonah')]
+    team1: list[Player] = [Player('Kazuki'), Player('Adam'), Player('Rome'), Player('Sander'), Player('Zhenghan')]
+    team2: list[Player] = [Player('Mauk'), Player('Jille'), Player('Jonah'), Player('Merlijn'), Player('Byuri')]
 
     game: Game = Game(team1, team2)
 

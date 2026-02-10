@@ -1,5 +1,5 @@
 # Game time constants
-PLAYERS_ON_COURT: int = 3
+PLAYERS_ON_COURT: int = 5
 REGULATION_PERIODS: int = 4
 REGULATION_PERIOD_LENGTH: int = 12 * 60
 OVERTIME_PERIOD_LENGTH: int = 5 * 60
@@ -24,7 +24,7 @@ SHOOTING_EFFICIENCY_MEAN: float = 0.5
 SHOOTING_EFFICIENCY_SD: float = 0.15
 REBOUNDING_MEAN: float = 0.5
 REBOUNDING_SD: float = 0.15
-SHOOTING_TENDENCY_FACTOR: float = 2 # Higher means better shooters shoot more shots
+SHOOTING_TENDENCY_FACTOR: float = 0.75 # Higher means better shooters shoot more shots
 
 if SHOOTING_EFFICIENCY_MEAN > 1: raise ValueError("Mean must be <= 1")
 if SHOOTING_EFFICIENCY_SD < 0: raise ValueError("Mean must be >= 0")

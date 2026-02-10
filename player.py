@@ -3,11 +3,28 @@ from config import *
 
 
 class Player:
-    def __init__(self, name: str):
+    def __init__(self, name: str, shot_accuracy: float = None, rebounding: float = None):
+        if not name: raise ValueError("Name cannot be empty")
+
+        if shot_accuracy:
+            if shot_accuracy < 0: raise ValueError("Shot accuracy must be >= 0")
+            if shot_accuracy > 1: raise ValueError("Shot accuracy must be <= 1")
+
+        if rebounding:
+            if rebounding < 0: raise ValueError("Rebounding must be >= 0")
+            if rebounding > 1: raise ValueError("Rebounding must be <= 1")
+
         self.name = name
 
-        self.shot_accuracy: float = clamp(random.normalvariate(SHOOTING_EFFICIENCY_MEAN, SHOOTING_EFFICIENCY_SD))
-        self.rebounding: float = clamp(random.normalvariate(REBOUNDING_MEAN, REBOUNDING_SD))
+        if shot_accuracy:
+            self.shot_accuracy = shot_accuracy
+        else:
+            self.shot_accuracy: float = clamp(random.normalvariate(SHOOTING_EFFICIENCY_MEAN, SHOOTING_EFFICIENCY_SD))
+
+        if rebounding:
+            self.rebounding = rebounding
+        else:
+            self.rebounding: float = clamp(random.normalvariate(REBOUNDING_MEAN, REBOUNDING_SD))
 
     def __str__(self):
         return self.__repr__()
