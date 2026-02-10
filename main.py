@@ -16,7 +16,6 @@ def display_score_graph(game: Game) -> None:
 
     plt.show()
 
-
 def main() -> None:
     team1: list[Player] = [Player('Kazuki'), Player('Adam'), Player('Rome'), Player('Sander'), Player('Zhenghan')]
     team2: list[Player] = [Player('Mauk'), Player('Jille'), Player('Jonah'), Player('Merlijn'), Player('Byuri')]
@@ -25,7 +24,7 @@ def main() -> None:
 
     game.sim_game()
 
-    display_score_graph(game)
+    # display_score_graph(game)
 
 
 if __name__ == '__main__':

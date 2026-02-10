@@ -37,3 +37,16 @@ BLUE = '\033[94m'
 RED = '\033[91m'
 BOLD = '\033[1m'
 END = '\033[0m'
+
+# Display event types
+from enum import Enum
+
+class Event(Enum):
+    PERIOD = 0
+    TIME_DISPLAY = 1
+    SCORE_DISPLAY = 2
+    SHOT_ATTEMPT = 3
+    REBOUND = 4
+    WINNER = 5
+    BOXSCORE = 6
+
