@@ -85,7 +85,7 @@ class Game:
             else:
                 self.team2_score += points
 
-            self.log(self.print_shot_attempt(player, points), Event.SCORE_DISPLAY)
+            self.log(self.print_shot_attempt(player, points), Event.SHOT_ATTEMPT)
             self.boxscore[player]['points'] += points
 
             if points > 0: # Scored, possession over

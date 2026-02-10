@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 
+from displaygame import DisplayGame
 from game import Game
 from player import Player
 
@@ -23,6 +24,9 @@ def main() -> None:
     game: Game = Game(team1, team2)
 
     game.sim_game()
+
+    display = DisplayGame()
+    display.display_game(game)
 
     # display_score_graph(game)
 
