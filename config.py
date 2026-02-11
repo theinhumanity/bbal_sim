@@ -33,7 +33,21 @@ if REBOUNDING_SD < 0: raise ValueError("Mean must be >= 0")
 if SHOOTING_TENDENCY_FACTOR < 0: raise ValueError("Tendency factor must be >= 0")
 
 # Printing constants
-BLUE = '\033[94m'
-RED = '\033[91m'
-BOLD = '\033[1m'
-END = '\033[0m'
+BLUE = ''
+RED = ''
+BOLD = ''
+END = ''
+
+from enum import Enum
+# Display event types
+class Event(Enum):
+    PERIOD = 0
+    TIME_DISPLAY = 1
+    SCORE_DISPLAY = 2
+    SHOT_ATTEMPT = 3
+    REBOUND = 4
+    WINNER = 5
+    BOXSCORE = 6
+
+TYPES_TO_DISPLAY = [Event.SHOT_ATTEMPT, Event.REBOUND]
+

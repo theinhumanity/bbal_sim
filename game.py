@@ -14,7 +14,7 @@ class Game:
         self.team1_score: int = 0
         self.team2_score: int = 0
 
-        self.most_recent_scorer = 0
+        self.most_recent_scorer: int = 0
 
         self.offense: list[Player] = team1
         self.defense: list[Player] = team2
@@ -26,27 +26,29 @@ class Game:
                 'rebounds': 0,
             }
 
-        self.game_seconds_played = 0
+        self.game_seconds_played: int = 0
 
         # (game_seconds_played, team1_score, team2_score)
         self.score_history: list[tuple[int, int, int]] = []
 
-    @staticmethod
-    def log(msg: str) -> None:
-        print(msg)
+        self.event_list: list[tuple[str, Event]] = []
+
+    def log(self, msg: str, event_type: Event) -> None:
+        #print(msg)
+        self.event_list.append((msg, event_type))
 
     def sim_game(self) -> None:
         print(self.team1, self.team2)
 
         for period in range(REGULATION_PERIODS):
-            self.log(f"Q{period + 1}")
+            self.log(f"Q{period + 1}", Event.PERIOD)
 
             self.sim_period(REGULATION_PERIOD_LENGTH)
 
         overtimes: int = 0
 
         while self.team1_score == self.team2_score:
-            self.log(f"{overtimes + 1 }OT" if overtimes > 0 else "OT")
+            self.log(f"{overtimes + 1 }OT" if overtimes > 0 else "OT", Event.PERIOD)
             overtimes += 1
 
             self.sim_period(OVERTIME_PERIOD_LENGTH)
@@ -56,12 +58,8 @@ class Game:
     def sim_period(self, period_length: int) -> None:
         period_time: int = period_length
         while period_time > 0:
-            self.log(self.print_time(period_time))
-
             time_elapsed = self.sim_possession(period_time)
             period_time -= time_elapsed
-
-            self.log(self.print_score())
 
             self.game_seconds_played += time_elapsed
             self.score_history.append((self.game_seconds_played, self.team1_score, self.team2_score))
@@ -83,16 +81,22 @@ class Game:
             else:
                 self.team2_score += points
 
-            self.log(self.print_shot_attempt(player, points))
             self.boxscore[player]['points'] += points
+
+            self.log(self.print_score(), Event.SCORE_DISPLAY)
+            self.log(self.print_time(period_time - time_elapsed), Event.TIME_DISPLAY)
+            self.log(self.print_shot_attempt(player, points), Event.SHOT_ATTEMPT)
 
             if points > 0: # Scored, possession over
                 possession_over = True
                 self.most_recent_scorer = 1 if self.offense is self.team1 else 2
                 self.switch_possession()
             else:
+                time_elapsed += random.randrange(1, 2)
                 rebounder: Player = self.rebound()
-                self.log(self.print_rebound(rebounder))
+                self.log(self.print_score(), Event.SCORE_DISPLAY)
+                self.log(self.print_time(period_time - time_elapsed), Event.TIME_DISPLAY)
+                self.log(self.print_rebound(rebounder), Event.REBOUND)
                 self.boxscore[rebounder]['rebounds'] += 1
 
                 if rebounder in self.offense: # Offensive rebound, possession continues
@@ -112,14 +116,14 @@ class Game:
 
     def handle_winner(self):
         if self.team1_score > self.team2_score:
-            self.log(f"Team 1 {self.team1} won by {self.team1_score - self.team2_score} points!!!")
+            self.log(f"Team 1 {self.team1} won by {self.team1_score - self.team2_score} points!!!", Event.WINNER)
         elif self.team2_score > self.team1_score:
-            self.log(f"Team 2 {self.team2} won by {self.team2_score - self.team1_score} points!!!)")
+            self.log(f"Team 2 {self.team2} won by {self.team2_score - self.team1_score} points!!!", Event.WINNER)
         else:
-            self.log("Tie.")
+            raise ValueError("Game ended in a tie!")
 
         for player in self.team1 + self.team2:
-            self.log(f"{player.name} scored {self.boxscore[player]['points']} points and grabbed {self.boxscore[player]['rebounds']} rebounds")
+            self.log(f"{player.name} scored {self.boxscore[player]['points']} points and grabbed {self.boxscore[player]['rebounds']} rebounds", Event.BOXSCORE)
 
 
     def print_rebound(self, rebounder: Player) -> str:
