@@ -58,12 +58,8 @@ class Game:
     def sim_period(self, period_length: int) -> None:
         period_time: int = period_length
         while period_time > 0:
-            self.log(self.print_time(period_time), Event.TIME_DISPLAY)
-
             time_elapsed = self.sim_possession(period_time)
             period_time -= time_elapsed
-
-            self.log(self.print_score(), Event.SCORE_DISPLAY)
 
             self.game_seconds_played += time_elapsed
             self.score_history.append((self.game_seconds_played, self.team1_score, self.team2_score))
@@ -85,15 +81,21 @@ class Game:
             else:
                 self.team2_score += points
 
-            self.log(self.print_shot_attempt(player, points), Event.SHOT_ATTEMPT)
             self.boxscore[player]['points'] += points
+
+            self.log(self.print_score(), Event.SCORE_DISPLAY)
+            self.log(self.print_time(period_time - time_elapsed), Event.TIME_DISPLAY)
+            self.log(self.print_shot_attempt(player, points), Event.SHOT_ATTEMPT)
 
             if points > 0: # Scored, possession over
                 possession_over = True
                 self.most_recent_scorer = 1 if self.offense is self.team1 else 2
                 self.switch_possession()
             else:
+                time_elapsed += random.randrange(1, 2)
                 rebounder: Player = self.rebound()
+                self.log(self.print_score(), Event.SCORE_DISPLAY)
+                self.log(self.print_time(period_time - time_elapsed), Event.TIME_DISPLAY)
                 self.log(self.print_rebound(rebounder), Event.REBOUND)
                 self.boxscore[rebounder]['rebounds'] += 1
 

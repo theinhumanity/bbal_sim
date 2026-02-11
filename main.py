@@ -25,6 +25,9 @@ def main() -> None:
 
     game.sim_game()
 
+    for event in game.event_list:
+        print(event)
+
     display = DisplayGame()
     display.display_game(game)
 
