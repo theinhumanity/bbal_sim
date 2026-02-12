@@ -88,7 +88,7 @@ class Game:
                 self.switch_possession()
             else:
                 rebounder: Player = self.rebound()
-                self.elapse_time(random.randrange(0, 2), clamp=True)
+                self.elapse_time(random.randrange(MIN_REBOUND_TIME, MAX_REBOUND_TIME), clamp=True)
                 self.log(self.print_score(), Event.SCORE_DISPLAY)
                 self.log(self.print_time(), Event.TIME_DISPLAY)
                 self.log(self.print_rebound(rebounder), Event.REBOUND)

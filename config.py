@@ -4,6 +4,8 @@ REGULATION_PERIODS: int = 4
 REGULATION_PERIOD_LENGTH: int = 12 * 60
 OVERTIME_PERIOD_LENGTH: int = 5 * 60
 SHOT_CLOCK_LENGTH: int = 24
+MIN_REBOUND_TIME: int = 0
+MAX_REBOUND_TIME: int = 2
 
 if REGULATION_PERIODS < 1: raise ValueError("Periods must be >= 1")
 if REGULATION_PERIOD_LENGTH < 1: raise ValueError("Period length must be >= 1")
@@ -11,6 +13,8 @@ if OVERTIME_PERIOD_LENGTH < 1: raise ValueError("Overtime length must be >= 1")
 if SHOT_CLOCK_LENGTH < 1: raise ValueError("Shot clock must be >= 1")
 if SHOT_CLOCK_LENGTH > REGULATION_PERIOD_LENGTH: raise ValueError("Shot clock must be <= period seconds")
 if SHOT_CLOCK_LENGTH > OVERTIME_PERIOD_LENGTH: raise ValueError("Shot clock must be <= overtime seconds")
+if MIN_REBOUND_TIME < 0: raise ValueError("Minimum rebound time must be >= 0")
+if MAX_REBOUND_TIME <= MIN_REBOUND_TIME: raise ValueError("Maximum rebound time must be > minimum rebound time")
 
 # Game simulation constants
 OFFENSIVE_REBOUNDING_FACTOR = 0.3 # 0 = no offensive rebounds, 1 = only offensive rebounds
