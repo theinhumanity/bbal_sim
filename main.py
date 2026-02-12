@@ -25,13 +25,13 @@ def main() -> None:
 
     game.sim_game()
 
-    for event in game.event_list:
-        print(event)
+    game.print_all_events()
 
-    display = DisplayGame()
-    display.display_game(game)
+    display_score_graph(game)
 
-    # display_score_graph(game)
+    # display = DisplayGame()
+    # display.display_game(game)
+
 
 
 if __name__ == '__main__':

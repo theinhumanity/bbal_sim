@@ -27,6 +27,7 @@ class Game:
             }
 
         self.game_seconds_played: int = 0
+        self.seconds_left_period = REGULATION_PERIOD_LENGTH
 
         # (game_seconds_played, team1_score, team2_score)
         self.score_history: list[tuple[int, int, int]] = []
@@ -34,16 +35,15 @@ class Game:
         self.event_list: list[tuple[str, Event]] = []
 
     def log(self, msg: str, event_type: Event) -> None:
-        #print(msg)
+        # print(msg)
         self.event_list.append((msg, event_type))
 
     def sim_game(self) -> None:
-        print(self.team1, self.team2)
-
         for period in range(REGULATION_PERIODS):
             self.log(f"Q{period + 1}", Event.PERIOD)
 
-            self.sim_period(REGULATION_PERIOD_LENGTH)
+            self.seconds_left_period = REGULATION_PERIOD_LENGTH
+            self.sim_period()
 
         overtimes: int = 0
 
@@ -51,28 +51,23 @@ class Game:
             self.log(f"{overtimes + 1 }OT" if overtimes > 0 else "OT", Event.PERIOD)
             overtimes += 1
 
-            self.sim_period(OVERTIME_PERIOD_LENGTH)
+            self.seconds_left_period = OVERTIME_PERIOD_LENGTH
+            self.sim_period()
 
         self.handle_winner()
 
-    def sim_period(self, period_length: int) -> None:
-        period_time: int = period_length
-        while period_time > 0:
-            time_elapsed = self.sim_possession(period_time)
-            period_time -= time_elapsed
-
-            self.game_seconds_played += time_elapsed
+    def sim_period(self) -> None:
+        while self.seconds_left_period > 0:
+            self.sim_possession()
             self.score_history.append((self.game_seconds_played, self.team1_score, self.team2_score))
 
-    def sim_possession(self, period_time: int) -> int:
+    def sim_possession(self):
         possession_over: bool = False
-        time_elapsed: int = 0
 
-        while not possession_over and period_time > 0:
-            if period_time - time_elapsed > SHOT_CLOCK_LENGTH:
-                time_elapsed += random.randrange(1, SHOT_CLOCK_LENGTH)
-            else:
-                time_elapsed = period_time
+        while not possession_over and self.seconds_left_period > 0:
+            time_elapsed = min(random.randrange(1, SHOT_CLOCK_LENGTH), self.seconds_left_period)
+
+            self.elapse_time(time_elapsed, clamp=True)
 
             player, points = self.shot_attempt()
 
@@ -84,7 +79,7 @@ class Game:
             self.boxscore[player]['points'] += points
 
             self.log(self.print_score(), Event.SCORE_DISPLAY)
-            self.log(self.print_time(period_time - time_elapsed), Event.TIME_DISPLAY)
+            self.log(self.print_time(), Event.TIME_DISPLAY)
             self.log(self.print_shot_attempt(player, points), Event.SHOT_ATTEMPT)
 
             if points > 0: # Scored, possession over
@@ -92,10 +87,10 @@ class Game:
                 self.most_recent_scorer = 1 if self.offense is self.team1 else 2
                 self.switch_possession()
             else:
-                time_elapsed += random.randrange(1, 2)
                 rebounder: Player = self.rebound()
+                self.elapse_time(random.randrange(0, 2), clamp=True)
                 self.log(self.print_score(), Event.SCORE_DISPLAY)
-                self.log(self.print_time(period_time - time_elapsed), Event.TIME_DISPLAY)
+                self.log(self.print_time(), Event.TIME_DISPLAY)
                 self.log(self.print_rebound(rebounder), Event.REBOUND)
                 self.boxscore[rebounder]['rebounds'] += 1
 
@@ -108,7 +103,16 @@ class Game:
                 else:
                     raise ValueError("Rebounder neither of offense or defense!")
 
-        return time_elapsed
+    def elapse_time(self, time_to_elapse: int, clamp: bool = False) -> None:
+        if time_to_elapse > self.seconds_left_period and not clamp: raise ValueError("Time to elapse too long")
+
+        if time_to_elapse > self.seconds_left_period and clamp:
+            elapsed_time = self.seconds_left_period
+        else:
+            elapsed_time = time_to_elapse
+
+        self.seconds_left_period -= elapsed_time
+        self.game_seconds_played += elapsed_time
 
     def switch_possession(self):
         self.offense, self.defense = self.defense, self.offense
@@ -187,7 +191,9 @@ class Game:
 
         return random.choices(players, weights=weights, k=1)[0]
 
+    def print_time(self) -> str:
+        return f"{self.seconds_left_period // 60 :02}:{self.seconds_left_period % 60 :02}"
 
-    @staticmethod
-    def print_time(period_time) -> str:
-        return f"{period_time // 60 :02}:{period_time % 60 :02}"
+    def print_all_events(self):
+        for event_msg, _ in self.event_list:
+            print(event_msg)

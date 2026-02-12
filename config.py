@@ -1,4 +1,4 @@
-# Game time constants
+# Game management constants
 PLAYERS_ON_COURT: int = 5
 REGULATION_PERIODS: int = 4
 REGULATION_PERIOD_LENGTH: int = 12 * 60
@@ -33,10 +33,18 @@ if REBOUNDING_SD < 0: raise ValueError("Mean must be >= 0")
 if SHOOTING_TENDENCY_FACTOR < 0: raise ValueError("Tendency factor must be >= 0")
 
 # Printing constants
-BLUE = ''
-RED = ''
-BOLD = ''
-END = ''
+USE_COLORS = True # Only when printing to terminal
+
+if USE_COLORS:
+    BLUE = '\033[94m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    END = '\033[0m'
+else:
+    BLUE = ''
+    RED = ''
+    BOLD = ''
+    END = ''
 
 from enum import Enum
 # Display event types
