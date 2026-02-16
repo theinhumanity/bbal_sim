@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 
+from config import REGULATION_PERIODS, REGULATION_PERIOD_LENGTH, OVERTIME_PERIOD_LENGTH
 from displaygame import DisplayGame
 from game import Game
 from player import Player
@@ -18,6 +19,7 @@ def display_score_graph(game: Game) -> None:
     plt.show()
 
 def main() -> None:
+
     team1: list[Player] = [Player('Kazuki'), Player('Adam'), Player('Rome'), Player('Sander'), Player('Zhenghan')]
     team2: list[Player] = [Player('Mauk'), Player('Jille'), Player('Jonah'), Player('Merlijn'), Player('Byuri')]
 
@@ -25,12 +27,13 @@ def main() -> None:
 
     game.sim_game()
 
-    game.print_all_events()
+    # game.print_all_events()
 
-    display_score_graph(game)
+    # display_score_graph(game)
 
-    # display = DisplayGame()
-    # display.display_game(game)
+
+    display = DisplayGame()
+    display.display_game(game)
 
 
 

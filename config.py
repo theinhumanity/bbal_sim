@@ -37,7 +37,7 @@ if REBOUNDING_SD < 0: raise ValueError("Mean must be >= 0")
 if SHOOTING_TENDENCY_FACTOR < 0: raise ValueError("Tendency factor must be >= 0")
 
 # Printing constants
-USE_COLORS = True # Only when printing to terminal
+USE_COLORS = False # Only when printing to terminal
 
 if USE_COLORS:
     BLUE = '\033[94m'
@@ -50,16 +50,19 @@ else:
     BOLD = ''
     END = ''
 
-from enum import Enum
+from enum import Enum, auto
+
 # Display event types
 class Event(Enum):
-    PERIOD = 0
-    TIME_DISPLAY = 1
-    SCORE_DISPLAY = 2
-    SHOT_ATTEMPT = 3
-    REBOUND = 4
-    WINNER = 5
-    BOXSCORE = 6
+    REGULATION_PERIOD = auto()
+    OVERTIME_PERIOD = auto()
+    TIME_DISPLAY = auto()
+    SCORE_DISPLAY = auto()
+    SHOT_ATTEMPT = auto()
+    REBOUND = auto()
+    WINNER = auto()
+    BOXSCORE = auto()
 
-TYPES_TO_DISPLAY = [Event.SHOT_ATTEMPT, Event.REBOUND]
+PLAY_EVENTS = [Event.SHOT_ATTEMPT, Event.REBOUND]
+PERIOD_EVENTS = [Event.REGULATION_PERIOD, Event.OVERTIME_PERIOD]
 

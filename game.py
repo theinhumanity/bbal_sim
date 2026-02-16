@@ -1,5 +1,6 @@
 import random
 
+import utils
 from player import Player
 from config import *
 
@@ -40,7 +41,7 @@ class Game:
 
     def sim_game(self) -> None:
         for period in range(REGULATION_PERIODS):
-            self.log(f"Q{period + 1}", Event.PERIOD)
+            self.log(f"Q{period + 1}", Event.REGULATION_PERIOD)
 
             self.seconds_left_period = REGULATION_PERIOD_LENGTH
             self.sim_period()
@@ -48,7 +49,7 @@ class Game:
         overtimes: int = 0
 
         while self.team1_score == self.team2_score:
-            self.log(f"{overtimes + 1 }OT" if overtimes > 0 else "OT", Event.PERIOD)
+            self.log(f"{overtimes + 1 }OT" if overtimes > 0 else "OT", Event.OVERTIME_PERIOD)
             overtimes += 1
 
             self.seconds_left_period = OVERTIME_PERIOD_LENGTH
@@ -174,9 +175,7 @@ class Game:
 
 
     def print_score(self) -> str:
-        team1_score_string: str = f"{BOLD if self.most_recent_scorer == 1 else ''}{self.team1_score:}{END}"
-        team2_score_string: str = f"{BOLD if self.most_recent_scorer == 2 else ''}{self.team2_score:}{END}"
-        return f"{team1_score_string} - {team2_score_string}"
+        return utils.format_score(self.team1_score, self.team2_score, self.most_recent_scorer)
 
 
     def rebound(self) -> Player:
@@ -192,7 +191,7 @@ class Game:
         return random.choices(players, weights=weights, k=1)[0]
 
     def print_time(self) -> str:
-        return f"{self.seconds_left_period // 60 :02}:{self.seconds_left_period % 60 :02}"
+        return utils.format_time(self.seconds_left_period)
 
     def print_all_events(self):
         for event_msg, _ in self.event_list:
