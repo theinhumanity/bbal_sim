@@ -27,13 +27,13 @@ def main() -> None:
 
     game.sim_game()
 
-    # game.print_all_events()
+    game.print_all_events()
 
     # display_score_graph(game)
 
 
-    display = DisplayGame()
-    display.display_game(game)
+    # display = DisplayGame()
+    # display.display_game(game)
 
 
 
