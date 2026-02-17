@@ -31,7 +31,7 @@ REBOUNDING_SD: float = 0.15
 DEFENSE_MEAN: float = 0.5
 DEFENSE_SD: float = 0.15
 SHOOTING_TENDENCY_FACTOR: float = 0.75 # Higher means better shooters shoot more shots
-DEFENSE_IMPACT_FACTOR: float = 0.2 # Lower means defense affects efficiency less
+DEFENSE_IMPACT_FACTOR: float = 1 # Higher means defense affects efficiency more
 
 if SHOOTING_EFFICIENCY_MEAN > 1: raise ValueError("Mean must be <= 1")
 if SHOOTING_EFFICIENCY_SD < 0: raise ValueError("Mean must be >= 0")

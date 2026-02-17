@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 
-from config import REGULATION_PERIODS, REGULATION_PERIOD_LENGTH, OVERTIME_PERIOD_LENGTH
 from displaygame import DisplayGame
 from game import Game
 from player import Player

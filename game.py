@@ -170,7 +170,7 @@ class Game:
 
         defense: float = utils.get_team_defense(self.defense)
 
-        make_threshold: float = player.shot_accuracy * (defense ** DEFENSE_IMPACT_FACTOR)
+        make_threshold: float = player.shot_accuracy / (1 + defense) ** DEFENSE_IMPACT_FACTOR
 
         if random.random() < make_threshold:
             points += 2
