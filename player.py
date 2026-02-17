@@ -34,7 +34,7 @@ class Player:
         if defense:
             self.defense = defense
         else:
-            self.defense: float = clamp(random.normalvariate())
+            self.defense: float = clamp(random.normalvariate(DEFENSE_MEAN, DEFENSE_SD))
 
     def __str__(self):
         return self.__repr__()
